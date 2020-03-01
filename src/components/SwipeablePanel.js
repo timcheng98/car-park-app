@@ -6,7 +6,7 @@ import {
   State,
   TapGestureHandler,
 } from 'react-native-gesture-handler';
-
+import LinearGradient from 'react-native-linear-gradient';
 // import { LoremIpsum } from '../common';
 // import { USE_NATIVE_DRIVER } from '../config';
 const USE_NATIVE_DRIVER = true;
@@ -23,7 +23,7 @@ export class BottomSheet extends Component {
     super(props);
     const START = SNAP_POINTS_FROM_TOP[0];
     const END = SNAP_POINTS_FROM_TOP[SNAP_POINTS_FROM_TOP.length - 1];
-
+    console.log(END)
     this.state = {
       lastSnap: END,
     };
@@ -54,15 +54,12 @@ export class BottomSheet extends Component {
       this._translateYOffset,
       Animated.add(this._dragY, this._reverseLastScrollY)
     ).interpolate({
-      inputRange: [START, END],
-      outputRange: [START, END],
+      inputRange: [5, END],
+      outputRange: [-400, -50],
       extrapolate: 'clamp',
     });
   }
 
-  componentDidMount() {
-    console.log('test props', this.props);
-  }
   _onHeaderHandlerStateChange = ({ nativeEvent }) => {
     if (nativeEvent.oldState === State.BEGAN) {
       this._lastScrollY.setValue(0);
@@ -100,12 +97,13 @@ export class BottomSheet extends Component {
     }
   };
   render() {
+    console.log('this._lastScrollYValue', this.state.lastSnap)
     return (
       <TapGestureHandler
         maxDurationMs={100000}
         ref={this.masterdrawer}
         maxDeltaY={this.state.lastSnap - SNAP_POINTS_FROM_TOP[0]}>
-        <View style={StyleSheet.absoluteFillObject} pointerEvents="box-none">
+        <View style={{height: '100%'}} pointerEvents="box-none">
           <Animated.View
             style={[
               StyleSheet.absoluteFillObject,
@@ -119,7 +117,22 @@ export class BottomSheet extends Component {
               shouldCancelWhenOutside={false}
               onGestureEvent={this._onGestureEvent}
               onHandlerStateChange={this._onHeaderHandlerStateChange}>
-              <Animated.View style={styles.header} />
+              <Animated.View style={
+                styles.header} >
+                <View style={{flex: 1}}>
+                  <View style={{flex: 0.5, alignItems: 'center', justifyContent: 'center'}}>
+                    <View
+                      style={{
+                        width: '50%',
+                        borderRadius: 15,
+                        borderBottomColor: '#DCDCDC',
+                        borderBottomWidth: 8,
+                      }}
+                    />
+                  </View>
+                  <View style={{flex:0.5, alignItems: 'center', justifyContent: 'center'}}><Text style={{fontSize: 18, fontWeight: 'bold'}}>附近可泊車位</Text></View>
+                </View>
+              </Animated.View>
             </PanGestureHandler>
             <PanGestureHandler
               ref={this.drawer}
@@ -132,16 +145,20 @@ export class BottomSheet extends Component {
                   ref={this.scroll}
                   waitFor={this.masterdrawer}
                   simultaneousHandlers={this.drawer}>
-                  <Animated.ScrollView
-                    style={[
-                      styles.scrollView,
-                      { marginBottom: SNAP_POINTS_FROM_TOP[0] },
-                    ]}
+                  <Animated.View
+                    style={
+                      { 
+                        // marginBottom: SNAP_POINTS_FROM_TOP[0],
+                        marginTop: 50
+                      }
+                    }
                     bounces={false}
                     onScrollBeginDrag={this._onRegisterLastScroll}
                     scrollEventThrottle={1}>
-                   {this.props.children}
-                  </Animated.ScrollView>
+                    <View>
+                      {this.props.children}
+                    </View>
+                  </Animated.View>
                 </NativeViewGestureHandler>
               </Animated.View>
             </PanGestureHandler>
@@ -155,7 +172,7 @@ export class BottomSheet extends Component {
 export default class Example extends Component {
   render() {
     return (
-        <BottomSheet />
+        <BottomSheet {...this.props}/>
     );
   }
 }
@@ -163,9 +180,14 @@ export default class Example extends Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    // display: 'flex'
   },
   header: {
+    display: 'flex',
+    flexDirection: 'column',
     height: HEADER_HEIGHT,
-    backgroundColor: 'red',
+    borderTopRightRadius: 15,
+    borderTopLeftRadius: 15,
+    backgroundColor: 'white'
   },
 });
